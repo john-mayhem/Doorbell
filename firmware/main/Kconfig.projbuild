@@ -1,0 +1,19 @@
+menu "Doorbell"
+
+config DOORBELL_HOSTNAME
+    string "Hostname (mDNS name, DHCP name)"
+    default "doorbell"
+
+config DOORBELL_RING_TIMEOUT_S
+    int "Emulator: the panel stops calling after (s)"
+    default 45
+
+config DOORBELL_TALK_TIMEOUT_S
+    int "Emulator: the panel ends the conversation after (s)"
+    default 120
+
+config DOORBELL_DOOR_PULSE_MS
+    int "How long the open button is held (ms)"
+    default 1000
+
+endmenu

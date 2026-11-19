@@ -1,0 +1,12 @@
+# Secrets: never commit
+firmware/main/secrets.h
+firmware/main/fcm-key.json
+android/app/google-services.json
+*.jks
+*.keystore
+keystore.properties
+
+# Build output and logs
+build/
+*.log
+__pycache__/

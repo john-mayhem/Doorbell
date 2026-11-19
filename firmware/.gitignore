@@ -1,0 +1,7 @@
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+main/secrets.h
+main/fcm-key.json

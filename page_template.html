@@ -1,0 +1,137 @@
+<title>УКП-СМД-11 Schematic</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; the schematic breaks out wider and scrolls sideways on phones. */
+:root {
+  --bg: #f4f6f5;
+  --panel: #ffffff;
+  --ink: #17201c;
+  --muted: #5b6862;
+  --line: #d5ddd9;
+  --mask: #1d6b47;      /* solder-mask green: accent */
+  --net: #b4231c;       /* net-flag red, as in the drawing */
+  --chip: #e6efea;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111614; --panel: #18201c; --ink: #e3ebe7; --muted: #95a49d; --line: #2b3732;
+    --mask: #5cc092; --net: #ff7a6e; --chip: #1f2b25; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111614; --panel: #18201c; --ink: #e3ebe7; --muted: #95a49d; --line: #2b3732;
+  --mask: #5cc092; --net: #ff7a6e; --chip: #1f2b25; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: grid; gap: 6px; margin-bottom: 22px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mask); }
+h1 { font: 600 30px/1.15 var(--sans); margin: 0; text-wrap: balance; }
+h2 { font: 600 19px/1.3 var(--sans); margin: 34px 0 10px; text-wrap: balance; }
+p { margin: 0 0 10px; max-width: 70ch; }
+.sub { color: var(--muted); max-width: 75ch; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.pad { font: 500 12px/1 var(--mono); background: var(--chip); color: var(--mask); border-radius: 4px; padding: 2px 5px; white-space: nowrap; }
+.sheet { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; padding: 14px; }
+.sheet svg { display: block; width: 100%; min-width: 900px; height: auto; color: var(--ink); }
+.sheet svg text { font-family: var(--mono); }
+.caption { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.state { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.state h3 { margin: 0 0 6px; font: 600 15px/1.3 var(--sans); display: flex; gap: 8px; align-items: center; }
+.state h3 .tag { font: 500 11px/1 var(--mono); padding: 3px 6px; border-radius: 4px; background: var(--chip); color: var(--mask); }
+.state p { font-size: 14px; margin: 0; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 12px/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.open li { margin-bottom: 6px; }
+.open { max-width: 75ch; padding-left: 20px; }
+figure { margin: 0; }
+figure img { border-radius: 8px; border: 1px solid var(--line); display: block; max-width: 100%; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } h1 { font-size: 25px; } }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Apartment intercom handset · reverse-engineered</div>
+  <h1>УКП-СМД-11 Schematic</h1>
+  <p class="sub">СтройМастер Домофоны, board PCB-7047-V1.0-20100417, built 2017-09-04. It's a two-wire handset for coordinate (Vizit-type) door systems, with no chips: two S8050 transistors, one diode, a hook switch and a dozen passives. Every connection was traced from photos of the single-sided board and checked against meter readings. Numbers in <span class="pad">[brackets]</span> are pads on the photo further down.</p>
+</header>
+
+<div class="sheet" role="img" aria-label="Circuit diagram of the УКП-СМД-11 handset">
+{{SVG}}
+</div>
+<p class="caption">Red labels are net flags: two flags with the same name are the same wire. R13, R14, R15 and R26 are 0 Ω links on 4-way option pads; the factory uses them to rewire the board for other systems.</p>
+
+<h2>How it works</h2>
+<div class="states">
+  <div class="state"><h3>Waiting <span class="tag">on hook</span></h3>
+    <p>D1 passes only the positive line into the RAIL. The hook switch ties N6 to LINE −, so the only load is LED1 + R3 (2 kΩ). Idle line was ~1.2 V, below the LED's threshold, so it stays dark.</p></div>
+  <div class="state"><h3>Call <span class="tag">on hook</span></h3>
+    <p>The panel raises the line voltage on your apartment's pair, LED1 lights through R3, and the call tone is sent down the same two wires.</p></div>
+  <div class="state"><h3>Talking <span class="tag">lifted</span></h3>
+    <p>SW1 puts the earpiece between Q1's emitter and N6. Current flows Q1 → earpiece → R11 → Q2 base, so Q2 turns on and closes the main loop Q1 → R4 → Q2. The mic modulates Q1's base through R2 and C1; incoming audio drives the earpiece.</p></div>
+  <div class="state"><h3>Open door <span class="tag">SW3, while talking</span></h3>
+    <p>SW3 shorts Q2's base to LINE −. Q2 switches off and the loop current drops, which the panel reads as "open". That matches the Vizit passport: the lock opens only if the button is pressed during a conversation.</p></div>
+  <div class="state"><h3>Call volume <span class="tag">SW2</span></h3>
+    <p>In position "0" SW2 puts 55 Ω (four 220 Ω in parallel) across the line, so the call is quieter. Per the passport this also lowers the talk volume. Its NC and COM pins are tied together on the board, so only NO switches anything.</p></div>
+</div>
+
+<h2>Wires and pads</h2>
+<div class="two">
+  <div class="tbl"><table>
+    <thead><tr><th>Wire</th><th>Pad</th><th>Net</th></tr></thead>
+    <tbody>
+      <tr><td>Line, red</td><td class="num">[13]</td><td>LINE + (D1 anode, SW2 bank)</td></tr>
+      <tr><td>Line, black</td><td class="num">[14]</td><td>LINE − (Q2 emitter, SW3, SW1)</td></tr>
+      <tr><td>Box pad "L−"</td><td class="num">[8]</td><td>LINE + (silk is reversed)</td></tr>
+      <tr><td>Box pad "L+"</td><td class="num">[7]</td><td>LINE − (silk is reversed)</td></tr>
+      <tr><td>Handset green</td><td class="num">[9]</td><td>Earpiece − = mic + (one node)</td></tr>
+      <tr><td>Handset yellow</td><td class="num">[10]</td><td>Earpiece +</td></tr>
+      <tr><td>Handset black</td><td class="num">[11]</td><td>Mic −</td></tr>
+      <tr><td>Handset red</td><td class="num">[12]</td><td>Mic + (same node as [9])</td></tr>
+    </tbody></table></div>
+  <figure>
+    <img src="board_numbered_web.jpg" alt="Copper side of the board with every pad numbered" width="1062" height="1400">
+  </figure>
+</div>
+
+<h2>Parts</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Ref</th><th>Value</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td class="num">D1</td><td>LL4148-type (0.55 V)</td><td>Reverse-polarity protection, LINE + → RAIL</td></tr>
+    <tr><td class="num">Q1, Q2</td><td>S8050 NPN (SOT-23, "J3Y")</td><td>Q1 series pass + mic amp; Q2 off-hook loop and door-open switch</td></tr>
+    <tr><td class="num">R1</td><td>100 kΩ</td><td>Q1 base bias from RAIL</td></tr>
+    <tr><td class="num">R2</td><td>2 kΩ</td><td>Mic − → C1 → Q1 base</td></tr>
+    <tr><td class="num">R3</td><td>2 kΩ</td><td>LED1 current limit</td></tr>
+    <tr><td class="num">R4</td><td>560 Ω</td><td>Main loop, Q1 emitter → Q2 collector</td></tr>
+    <tr><td class="num">R11</td><td>10 kΩ</td><td>Q2 base drive</td></tr>
+    <tr><td class="num">R12</td><td>10 kΩ</td><td>Mic − → Q2 collector node</td></tr>
+    <tr><td class="num">R6 R7 R8 R10</td><td>220 Ω each (55 Ω together)</td><td>SW2 call-volume shunt. R6 is fitted upside down, so it reads "122".</td></tr>
+    <tr><td class="num">R13 R14 R15 R26</td><td>0 Ω</td><td>Option links</td></tr>
+    <tr><td class="num">R5, R9</td><td>not fitted</td><td>Option pads next to SW2</td></tr>
+    <tr><td class="num">C1</td><td>ceramic, unmarked</td><td>Mic feed to Q1 base</td></tr>
+    <tr><td class="num">E1</td><td>10 µF 50 V</td><td>Couples the earpiece/mic node to the Q2 collector node</td></tr>
+    <tr><td class="num">LED1</td><td>red, long legs</td><td>Call indicator, anode on RAIL</td></tr>
+    <tr><td class="num">SW1</td><td>HAIDU DPDT hook switch</td><td>Lifted: [1]–[5], [2]–[6]. On hook: [3]–[5], [4]–[6].</td></tr>
+    <tr><td class="num">SW2</td><td>SPDT slide</td><td>Call volume, 1 = loud, 0 = quiet</td></tr>
+    <tr><td class="num">SW3</td><td>12 mm tactile</td><td>Open door</td></tr>
+  </tbody></table></div>
+
+<h2>Still open</h2>
+<ul class="open">
+  <li><b>Where the ring sound comes from.</b> On hook, the earpiece has no path back to the line in this circuit, yet the passport promises an audible call. Next time someone rings, listen to whether the sound comes from the hanging earpiece, and check whether the lever is really pressed down with the handset in the cradle.</li>
+  <li><b>C1 value.</b> It can't be measured while soldered in. It doesn't matter for the C6 build.</li>
+  <li><b>LED polarity</b> is read from the copper (anode on RAIL). The meter's diode test gave nothing in-circuit.</li>
+</ul>
+</div>

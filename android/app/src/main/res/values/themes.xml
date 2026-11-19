@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Doorbell" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+    <color name="bg">#FF0E1320</color>
+    <color name="icon_bg">#FFF5A524</color>
+</resources>

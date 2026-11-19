@@ -1,0 +1,2 @@
+# SuperMini has no USB-UART chip: console on the built-in USB
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
