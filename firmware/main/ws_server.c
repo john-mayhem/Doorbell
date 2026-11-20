@@ -259,7 +259,7 @@ static esp_err_t audio_handler(httpd_req_t *req)
     return ok(req);
 }
 
-// POST /api/register {"token": "<FCM token>", "name": "<phone name>"}
+// POST /api/register {"token": "<FCM token>", "name": "<phone name>", "id": "<phone id>"}
 static esp_err_t register_handler(httpd_req_t *req)
 {
     char body[512];
@@ -275,7 +275,8 @@ static esp_err_t register_handler(httpd_req_t *req)
     cJSON *m = cJSON_Parse(body);
     const char *tok = cJSON_GetStringValue(cJSON_GetObjectItem(m, "token"));
     const char *name = cJSON_GetStringValue(cJSON_GetObjectItem(m, "name"));
-    esp_err_t err = fcm_register(tok, name);
+    const char *id = cJSON_GetStringValue(cJSON_GetObjectItem(m, "id"));
+    esp_err_t err = fcm_register(tok, name, id);
     cJSON_Delete(m);
     if (err != ESP_OK) return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "need token and name");
     return ok(req);

@@ -35,6 +35,7 @@ extern const char key_json_start[] asm("_binary_fcm_key_json_start");
 typedef struct {
     char token[200];
     char name[32];
+    char id[24];  // Android ID: survives reinstalls, unlike the token
 } dev_t_;
 
 static dev_t_ devs[MAX_DEV];
@@ -54,8 +55,8 @@ static void save(void)
 {
     nvs_handle_t h;
     if (nvs_open("fcm", NVS_READWRITE, &h) != ESP_OK) return;
-    nvs_set_blob(h, "devs", devs, sizeof(dev_t_) * n_devs);
-    nvs_set_i32(h, "n", n_devs);
+    nvs_set_blob(h, "phones", devs, sizeof(dev_t_) * n_devs);
+    nvs_set_i32(h, "n_phones", n_devs);
     nvs_commit(h);
     nvs_close(h);
 }
@@ -63,26 +64,33 @@ static void save(void)
 static void load(void)
 {
     nvs_handle_t h;
-    if (nvs_open("fcm", NVS_READONLY, &h) != ESP_OK) return;
+    if (nvs_open("fcm", NVS_READWRITE, &h) != ESP_OK) return;
+    if (nvs_erase_key(h, "devs") == ESP_OK) {  // fw 0.2.0 list (no phone ids): phones re-register on app start
+        nvs_erase_key(h, "n");
+        nvs_commit(h);
+    }
     int32_t n = 0;
     size_t sz = sizeof devs;
-    if (nvs_get_i32(h, "n", &n) == ESP_OK && n > 0 && n <= MAX_DEV && nvs_get_blob(h, "devs", devs, &sz) == ESP_OK)
+    if (nvs_get_i32(h, "n_phones", &n) == ESP_OK && n > 0 && n <= MAX_DEV && nvs_get_blob(h, "phones", devs, &sz) == ESP_OK &&
+        sz == sizeof(dev_t_) * n)
         n_devs = n;
     nvs_close(h);
 }
 
-esp_err_t fcm_register(const char *token, const char *name)
+esp_err_t fcm_register(const char *token, const char *name, const char *id)
 {
     if (!token || strlen(token) >= sizeof devs[0].token || !name) return ESP_ERR_INVALID_ARG;
+    if (!id) id = "";
     xSemaphoreTake(mtx, portMAX_DELAY);
     int slot = -1;
-    for (int i = 0; i < n_devs; i++)  // a token is one install of the app; names may repeat
-        if (!strcmp(devs[i].token, token)) slot = i;
+    for (int i = 0; i < n_devs; i++)  // same phone (id) or same install (token); names may repeat
+        if (!strcmp(devs[i].token, token) || (*id && !strcmp(devs[i].id, id))) slot = i;
     bool fresh = slot < 0;
     if (slot < 0) slot = n_devs < MAX_DEV ? n_devs++ : MAX_DEV - 1;
-    bool changed = fresh || strcmp(devs[slot].token, token) || strcmp(devs[slot].name, name);
+    bool changed = fresh || strcmp(devs[slot].token, token) || strcmp(devs[slot].name, name) || strcmp(devs[slot].id, id);
     strlcpy(devs[slot].token, token, sizeof devs[slot].token);
     strlcpy(devs[slot].name, name, sizeof devs[slot].name);
+    strlcpy(devs[slot].id, id, sizeof devs[slot].id);
     if (changed) save();
     xSemaphoreGive(mtx);
     if (changed) evlog("%s will get push notifications", name);

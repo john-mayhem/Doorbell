@@ -94,7 +94,10 @@ object Updater {
 
     /** Download the APK and give it to Android's installer. */
     suspend fun install(ctx: Context, r: Release): Boolean = withContext(Dispatchers.IO) {
-        state.value = State.Downloading(r)
+        synchronized(this@Updater) {  // one install at a time (extra taps on Update start nothing)
+            if (state.value is State.Downloading) return@withContext false
+            state.value = State.Downloading(r)
+        }
         val ok = runCatching {
             val pi = ctx.packageManager.packageInstaller
             val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {

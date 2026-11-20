@@ -44,8 +44,9 @@ Values of `reason` when the state becomes `idle`:
 
 ## Push messages (Firebase, ESP32 → every registered phone)
 
-Phones register with `POST /api/register {"token", "name"}` each time the app opens. A token is one
-install of the app, so two phones with the same name are still two phones. All data fields are strings;
+Phones register with `POST /api/register {"token", "name", "id"}` each time the app opens. `id` is the
+Android ID, which stays the same across reinstalls (the token doesn't), so the doorbell keeps one entry per
+phone. Two phones with the same name are still two phones. All data fields are strings;
 every message also carries `host` (the ESP32's IP) and `ts` (send time, Unix seconds).
 
 | `type` | Priority | When | Extra fields |

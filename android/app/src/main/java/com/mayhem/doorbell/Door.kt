@@ -80,7 +80,9 @@ object Door {
     suspend fun register(ctx: Context, token: String? = null): Boolean {
         val t = token ?: fcmToken() ?: return false
         val host = find(ctx) ?: return false
-        return post(host, "/api/register", JSONObject().put("token", t).put("name", Prefs.name(ctx)))
+        // ANDROID_ID survives reinstalls (same signing key), so the doorbell keeps one entry per phone.
+        val id = android.provider.Settings.Secure.getString(ctx.contentResolver, android.provider.Settings.Secure.ANDROID_ID).orEmpty()
+        return post(host, "/api/register", JSONObject().put("token", t).put("name", Prefs.name(ctx)).put("id", id))
     }
 
     private suspend fun fcmToken(): String? = suspendCancellableCoroutine { c ->

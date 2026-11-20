@@ -9,7 +9,8 @@
 #include "esp_err.h"
 
 void fcm_init(void);
-esp_err_t fcm_register(const char *token, const char *name);
+// `id` stays the same when the app is reinstalled (the token doesn't), so one phone = one entry.
+esp_err_t fcm_register(const char *token, const char *name, const char *id);
 // Async. `data` (string fields only, may be NULL) is owned and freed by fcm.
 // Urgent = high priority with a short life; otherwise normal priority, kept for a day.
 void fcm_notify(const char *type, cJSON *data, bool urgent);
