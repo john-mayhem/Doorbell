@@ -6,7 +6,8 @@ Goal: put an ESP32 inside the handset. The original handset keeps working. Our o
 ## Folders
 - `firmware/`: ESP-IDF 5.5.4 project. Right now it runs the **emulator** (`line_emu.c`) on a bare ESP32 DevKit.
 - `android/`: Kotlin + Compose app, package `com.mayhem.doorbell`, minSdk 31.
-- `docs/PROTOCOL.md`: the WebSocket protocol, call states and firmware layout.
+- `docs/PROTOCOL.md`: the WebSocket protocol, push messages, call states and firmware layout.
+- `docs/FINDINGS.md`: what testing taught us (push reliability, updates, power) and the decisions made.
 
 ## Handset reverse-engineering (done 2026-11-19)
 - NETLIST.md: the traced and meter-verified netlist, with the full measurement log.
@@ -37,17 +38,24 @@ Open **http://doorbell.local/** for the test page. It has the visitor side ("Rin
 The emulator has no GPIO. The panel stops ringing after 45 s and ends a conversation after 120 s.
 API: `POST /api/ring`, `POST /api/release`, `POST /api/audio?mode=echo|tone`, `GET /status`.
 
-## Releases and auto-update
-The app updates itself from this repo's GitHub Releases:
+## Releases and updates
+The app updates from this repo's GitHub Releases:
 1. Bump `versionCode` and `versionName` in `android/app/build.gradle.kts` and commit.
-2. Tag it and push the tag: `git tag v0.4.1 && git push origin v0.4.1`.
-3. `.github/workflows/release.yml` builds the signed APK and publishes it as release `v0.4.1`.
-4. Phones check the latest release twice a day (Settings → Check now does it at once), download it and install it.
+2. Tag it and push the tag: `git tag v0.4.5 && git push origin main v0.4.5`.
+3. `.github/workflows/release.yml` builds the signed APK and publishes it as release `v0.4.5`.
+4. Phones check twice a day (or Settings → Check now). Each update needs **one tap and a confirmation**: Play Protect and Samsung don't allow silent self-updates outside Google Play, and Play was rejected. See docs/FINDINGS.md.
 
-Signing: `android/doorbell-release.jks` + `android/keystore.properties` exist only on the PC (gitignored) and in the repo secrets. **Back the .jks up.** Without it no update can install over the current app; each phone would have to uninstall and install again.
+New phone: install the APK from the latest release (or `adb install` it), open it once on home Wi-Fi, and allow the 5 setup screens. It registers with the doorbell by itself.
 
-## Status
-- 2026-11-20: firmware 0.2.0 (emulator) runs on an **ESP32-C6 SuperMini** (COM3). The original ESP32 build still works with `idf.py set-target esp32`.
-  - App 0.4.0: Firebase push rings the phone full-screen even when it is locked. It has Settings, first-launch permission screens, a Recent list shared by all phones, and self-update.
-  - Trap: opening COM3 with a serial terminal resets the C6 (its built-in USB toggles DTR/RTS).
-- Not done yet: security (anyone on the Wi-Fi can open the door), the real line driver (`line_ukp.c`), live line measurements during a real call.
+Signing: `android/doorbell-release.jks` + `android/keystore.properties` exist only on the PC (gitignored) and in the repo secrets (`GOOGLE_SERVICES_JSON`, `KEYSTORE_B64`, `KEYSTORE_PASSWORD`). **Back the .jks up.** Without it no update can install over the current app; each phone would have to uninstall and install again. Local builds use the same key, so `adb install -r` works over a release build.
+
+## Status (2026-11-20)
+- Firmware 0.2.1 (emulator) runs on an **ESP32-C6 SuperMini** (COM3, about 50 °C at idle with Wi-Fi power save off). The original ESP32 build still works with `idf.py set-target esp32`.
+- App 0.4.4 on both phones (John's S21 Ultra, Violeta's S23). Tested working:
+  - Full-screen ring on a locked phone. Answer with two-way audio, open the door from the call or straight from the ring, Decline (ends the call for everyone).
+  - Both phones ring together; the first to answer stops the other.
+  - A shared Recent list, Settings (address, name, ringtone, volumes, vibrate, speaker, permissions, versions), 5 first-launch permission screens, and updates from GitHub.
+- **Open: push reliability.** The phone's Google push link went silently dead twice on the first night, and rings were lost. Not the router (tested). It looks fine since the phone shortened its heartbeat, but that isn't proven yet. See docs/FINDINGS.md: the overnight silent test is planned.
+- Trap: opening COM3 with a serial terminal resets the C6 (its built-in USB toggles DTR/RTS).
+- Not done yet: the push reliability proof, Wi-Fi power save while idle, security (anyone on the Wi-Fi can open the door), the real line driver (`line_ukp.c`), live line measurements during a real call.
+- **Next: plan the hardware** (the ESP inside the handset, power, line interface, parts).
